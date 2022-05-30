@@ -1,0 +1,45 @@
+version: "3.5"
+
+services:
+  mongo1:
+    container_name: mongo1
+    image: mongo:4.2
+    ports:
+      - 27017:27017
+    command: mongod --replSet my-mongo-set
+    networks: 
+      - mongo_replica_set
+    volumes: 
+      - 8207bcb6effbc5a3fac0b99287d8a26d391a709301f25b39e3428f9b05002a8b:/data/db
+  mongo2:
+    container_name: mongo2
+    image: mongo:4.2
+    ports:
+      - 27018:27017
+    command: mongod --replSet my-mongo-set
+    networks: 
+      - mongo_replica_set
+    volumes: 
+      - f043a3198763288797702daad56ac841b35c3c04767db8be71c752759545e60b:/data/db
+  mongo3:
+    container_name: mongo3
+    image: mongo:4.2
+    ports:
+      - 27019:27017
+    command: mongod --replSet my-mongo-set
+    networks: 
+      - mongo_replica_set
+    volumes: 
+      - 1bb826d3b7a9d5c3c29d95e5ff2124a15f9b60efe1d077f0aa679b8aedc891ba:/data/db
+
+networks: 
+  mongo_replica_set:
+    name: mongo_replica_set
+
+volumes:
+  1bb826d3b7a9d5c3c29d95e5ff2124a15f9b60efe1d077f0aa679b8aedc891ba:
+    external: true
+  f043a3198763288797702daad56ac841b35c3c04767db8be71c752759545e60b:
+    external: true
+  8207bcb6effbc5a3fac0b99287d8a26d391a709301f25b39e3428f9b05002a8b:
+    external: true
