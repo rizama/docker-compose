@@ -9,7 +9,14 @@ services:
     ports:
       - "5432:5432"
     volumes: 
-      - pgdata:/var/lib/postgresql/data
-volumes:
-  pgdata:
-    external: true
+
+      # Bind Mount
+      - ./pgdata:/var/lib/postgresql/data
+
+      # Volume Storage
+      # - pgdata:/var/lib/postgresql/data
+
+# Uncomment line below if you want to use Volume storage
+# volumes:
+#   pgdata:
+#     external: true
