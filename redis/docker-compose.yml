@@ -7,8 +7,14 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - redis_data:/data
 
-volumes: 
-  redis_data:
-    external: true
+      # Bind Mount
+      - ./redis_data:/data
+      
+      # Volume Storage
+      # - redis_data:/data
+
+# Uncomment line below if you want to use Volume storage
+# volumes: 
+#   redis_data:
+#     external: true

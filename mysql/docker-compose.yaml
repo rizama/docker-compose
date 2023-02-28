@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+    mysql:
+        container_name: my_mysql
+        image: mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: sam123
+        ports:
+            - 3306:3306
+        restart: always
+        volumes:
+            ## this docker-compose use bind mounts to host machine
+            ## if you want change to Volume version just edit the volume to :
+            # - data:/var/lib/mysql
+            - ./mysql_data:/var/lib/mysql
+        expose:
+            - 3306
+## uncomment code bellow if you want use volume storage instead bind mount
+# volumes:
+#   data:
