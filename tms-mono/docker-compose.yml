@@ -1,0 +1,99 @@
+version: "3.8"
+
+services:
+  mongo-tmsmono-1:
+    container_name: mongo-tmsmono-1
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    command: mongod --replSet tmsmono-rs
+    networks: 
+      - mongo_tmsmono_net
+    volumes:
+      # Bind Mount
+      - ./mongo-mono1:/data/db
+
+  mongo-tmsmono-2:
+    container_name: mongo-tmsmono-2
+    image: mongo:latest
+    ports:
+      - 27018:27017
+    command: mongod --replSet tmsmono-rs
+    networks: 
+      - mongo_tmsmono_net
+    volumes:
+      # Bind Mount
+      - ./mongo-mono2:/data/db
+
+  mongo-tmsmono-3:
+    container_name: mongo-tmsmono-3
+    image: mongo:latest
+    ports:
+      - 27019:27017
+    command: mongod --replSet tmsmono-rs
+    networks: 
+      - mongo_tmsmono_net
+    volumes:
+      # Bind Mount
+      - ./mongo-mono3:/data/db
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - 22181:2181
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - 29092:29092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  kafka_ui:
+    image: provectuslabs/kafka-ui:master
+    depends_on:
+      - kafka
+    ports:
+      - 8080:8080
+    environment:
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+
+  postgres-tmsmono:
+    container_name: postgres-tmsmono
+    image: postgres
+    env_file:
+      - database.env
+    ports:
+      - "54335432"
+    volumes: 
+      # Bind Mount
+      - ./pgdata:/var/lib/postgresql/data
+
+      # Volume Storage
+      # - pgdata:/var/lib/postgresql/data
+
+  redis-tmsmono:
+    container_name: redis-tmsmono
+    image: redis:5
+    ports:
+      - "6379:6379"
+    volumes:
+      # Bind Mount
+      - ./redis_data:/data
+
+      # Volume Storage
+      # - redis_data:/data
+
+networks: 
+  mongo_tmsmono_net:
+    driver: bridge

@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+    mariadb:
+        image: mariadb:latest
+        container_name: mariadb_container
+        env_file:
+            - database.env
+        ports:
+            - '3306:3306'
+        volumes:
+            - ./mariadb_data:/var/lib/mysql # Bind volume
+        networks:
+            - mariadb_network
+        restart: always
+
+networks:
+    mariadb_network:
+        driver: bridge
