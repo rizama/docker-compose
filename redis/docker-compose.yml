@@ -1,20 +1,26 @@
-version: "3.8"
+version: '3.8'
 
 services:
-  redis:
-    container_name: redis
-    image: redis:5
-    ports:
-      - "6379:6379"
-    volumes:
+    redis:
+        image: redis:7-alpine # 1. Menggunakan versi spesifik & kecil
+        container_name: redis
+        restart: unless-stopped # 2. Kebijakan restart
+        ports:
+            - '6379:6379'
 
-      # Bind Mount
-      - ./redis_data:/data
-      
-      # Volume Storage
-      # - redis_data:/data
+        # 3. Memberi tahu Redis untuk memulai dengan file konfigurasi kustom
+        command: redis-server /usr/local/etc/redis/redis.conf
 
-# Uncomment line below if you want to use Volume storage
-# volumes: 
-#   redis_data:
-#     external: true
+        # 4. Memuat variabel password dari file .env
+        env_file:
+            - .env
+
+        volumes:
+            # Mount file konfigurasi dari host ke dalam kontainer
+            - ./redis.conf:/usr/local/etc/redis/redis.conf
+
+            # Mount named volume untuk persistensi data
+            - redis_data:/data
+
+volumes:
+    redis_data:

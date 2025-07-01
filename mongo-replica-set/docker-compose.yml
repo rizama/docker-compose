@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+    mongo_rs_1:
+        image: mongo:7.0 # Menggunakan versi spesifik
+        container_name: mongo_rs_1
+        restart: unless-stopped
+        command: mongod --replSet mongodb-rs --bind_ip_all
+        ports:
+            - '27017:27017'
+        volumes:
+            - mongo_rs_1_data:/data/db
+        networks:
+            - mongo_rs_net
+
+    mongo_rs_2:
+        image: mongo:7.0 # Menggunakan versi spesifik
+        container_name: mongo_rs_2
+        restart: unless-stopped
+        command: mongod --replSet mongodb-rs --bind_ip_all
+        ports:
+            - '27018:27017'
+        volumes:
+            - mongo_rs_2_data:/data/db
+        networks:
+            - mongo_rs_net
+
+    mongo_rs_3:
+        image: mongo:7.0 # Menggunakan versi spesifik
+        container_name: mongo_rs_3
+        restart: unless-stopped
+        command: mongod --replSet mongodb-rs --bind_ip_all
+        ports:
+            - '27019:27017'
+        volumes:
+            - mongo_rs_3_data:/data/db
+        networks:
+            - mongo_rs_net
+
+    # Servis helper untuk inisiasi Replica Set secara otomatis
+    mongo-rs-setup:
+        image: mongo:7.0
+        container_name: mongo_rs_setup
+        depends_on:
+            - mongo_rs_1
+            - mongo_rs_2
+            - mongo_rs_3
+        # Command ini akan berjalan sekali dan mengkonfigurasi replica set
+        command: >
+            bash -c "
+              echo 'Mencoba inisiasi Replica Set...' &&
+              sleep 10 &&
+              mongosh --host mongo_rs_1:27017 --eval \"
+                rs.initiate({
+                  _id: 'mongodb-rs',
+                  members: [
+                    { _id: 0, host: 'mongo_rs_1:27017' },
+                    { _id: 1, host: 'mongo_rs_2:27017' },
+                    { _id: 2, host: 'mongo_rs_3:27017' }
+                  ]
+                }, { force: true })
+              \"
+            "
+        networks:
+            - mongo_rs_net
+
+networks:
+    mongo_rs_net:
+        driver: bridge
+
+volumes:
+    mongo_rs_1_data:
+    mongo_rs_2_data:
+    mongo_rs_3_data:
+

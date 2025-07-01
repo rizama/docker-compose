@@ -1,0 +1,46 @@
+docker exec -it mongo_rs_1 mongo (for mongo <= 4)
+docker exec -it mongo_rs_1 mongosh (for mongo >= 4)
+
+var config = {
+    "_id": "tmsmono-rs",
+    "version": 1,
+    "members": [
+        {
+            "_id": 0,
+            "host": "mongo_rs_1:27017",
+            "priority": 2
+        },
+        {
+            "_id": 1,
+            "host": "mongo_rs_2:27017",
+            "priority": 1
+        },
+        {
+            "_id": 2,
+            "host": "mongo_rs_3:27017",
+            "priority": 0
+        }
+    ]
+};
+rs.initiate(config, { force: true });
+rs.status();
+
+
+// optional
+var cfg = rs.conf();
+cfg.members[0].priority = 10;
+cfg.members[1].priority = 3;
+cfg.members[2].priority = 5;
+rs.reconfig(cfg);
+
+
+Cara Menggunakan
+1. Jalankan dari terminal: 
+    - docker-compose up -d
+2. Tunggu sekitar 15-20 detik agar semua node dan proses inisiasi berjalan. Anda bisa melihat log dari inisiator dengan: 
+    - docker logs mongo_rs_setup
+    Jika berhasil, Anda akan melihat output JSON dengan { "ok" : 1 }
+3. Verifikasi Replica Set:
+    Hubungkan ke node utama menggunakan mongosh: docker exec -it mongo_rs_1 mongosh
+4. Lalu di dalam shell mongosh, jalankan: rs.status()
+    Anda akan melihat status dari ketiga member replica set Anda.

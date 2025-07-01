@@ -1,22 +1,31 @@
-version: "3.8"
+version: '3.8'
 
 services:
-  postgres:
-    container_name: postgres
-    image: postgres
-    env_file:
-      - database.env
-    ports:
-      - "5432:5432"
-    volumes: 
+    postgres:
+        image: postgres:16-alpine # Menggunakan versi spesifik & Alpine yang lebih kecil
+        container_name: postgres_db
+        restart: unless-stopped
+        environment:
+            POSTGRES_USER: ${POSTGRES_USER}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+            POSTGRES_DB: ${POSTGRES_DB} # Membuat DB spesifik saat startup
+        ports:
+            - '5432:5432'
+        volumes:
+            # Hanya satu volume yang diperlukan untuk direktori data
+            - postgres_data:/var/lib/postgresql/data
 
-      # Bind Mount
-      - ./pgdata:/var/lib/postgresql/data
+    pgadmin:
+        image: dpage/pgadmin4:8 # Menggunakan versi spesifik
+        container_name: pgadmin_ui
+        restart: unless-stopped
+        environment:
+            PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+            PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+        ports:
+            - '5050:80'
+        depends_on: # Memastikan postgres jalan duluan
+            - postgres
 
-      # Volume Storage
-      # - pgdata:/var/lib/postgresql/data
-
-# Uncomment line below if you want to use Volume storage
-# volumes:
-#   pgdata:
-#     external: true
+volumes:
+    postgres_data:

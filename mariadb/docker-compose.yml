@@ -2,18 +2,33 @@ version: '3.8'
 
 services:
     mariadb:
-        image: mariadb:latest
-        container_name: mariadb_container
+        image: mariadb:11.4 # 1. Menggunakan versi spesifik
+        container_name: mariadb
+        restart: unless-stopped
         env_file:
-            - database.env
+            - database.env # 2. Penggunaan .env sudah sangat baik
         ports:
             - '3306:3306'
         volumes:
-            - ./mariadb_data:/var/lib/mysql # Bind volume
-        networks:
-            - mariadb_network
-        restart: always
+            - mariadb_data:/var/lib/mysql # 3. Menggunakan Named Volume (komentar diperbaiki)
 
-networks:
-    mariadb_network:
-        driver: bridge
+        # 4. (Opsional) Menambahkan Healthcheck untuk memeriksa kesiapan database
+        healthcheck:
+            test:
+                [
+                    'CMD',
+                    'mariadb-admin',
+                    'ping',
+                    '-h',
+                    'localhost',
+                    '-u',
+                    'root',
+                    '-p${MARIADB_ROOT_PASSWORD}',
+                ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 30s
+
+volumes:
+    mariadb_data:

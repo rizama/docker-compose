@@ -2,20 +2,18 @@ version: '3.8'
 
 services:
     mysql:
+        image: mysql:8.4 # 1. Menggunakan versi spesifik
         container_name: my_mysql
-        image: mysql
-        environment:
-            MYSQL_ROOT_PASSWORD: sam123
+        restart: unless-stopped # 2. Kebijakan restart yang lebih fleksibel
         ports:
-            - 3306:3306
-        restart: always
+            - '3306:3306'
+        # 3. Menggunakan env_file untuk keamanan
+        env_file:
+            - .env
         volumes:
-            ## this docker-compose use bind mounts to host machine
-            ## if you want change to Volume version just edit the volume to :
+            # 4. Menggunakan Named Volume dengan komentar yang benar
             - data:/var/lib/mysql
-            # - ./mysql_data:/var/lib/mysql
-        expose:
-            - 3306
-# uncomment code bellow if you want use volume storage instead bind mount
+        # 5. Baris 'expose' dihapus karena tidak perlu
+
 volumes:
     data:

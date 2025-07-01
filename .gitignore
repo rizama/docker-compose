@@ -3,3 +3,4 @@
 */redis_data
 */mongodata
 */mariadb_data
+*/.env

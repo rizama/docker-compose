@@ -1,20 +1,43 @@
-version: "3.8"
+version: '3.8'
 
 services:
-  mongo:
-    container_name: mongo
-    image: mongo:4.4
+  # Servis utama untuk database MongoDB
+  mongodb:
+    image: mongo:7.0 # Menggunakan versi spesifik, misal 7.0 atau 6.0
+    container_name: mongodb
+    restart: unless-stopped
+    environment:
+      # Kredensial ini akan digunakan untuk membuat user root saat database pertama kali dibuat
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
     ports:
+      # Memetakan port default MongoDB ke host Anda
       - "27017:27017"
-    command: mongod
-    volumes: 
-      # Bind Mount
-      - ./mongodata:/data/db
+    volumes:
+      # Menggunakan named volume untuk memastikan data Anda tidak hilang
+      - mongo_data:/data/db
 
-      # Volume Storage
-      # - mongodata:/data/db
+  # Servis tambahan untuk GUI (Web Interface)
+  mongo-express:
+    image: mongo-express:latest # Untuk mongo-express, latest biasanya cukup aman
+    container_name: mongo_express
+    restart: unless-stopped
+    ports:
+      # Memetakan web interface ke port 8081 di host Anda
+      - "8081:8081"
+    environment:
+      # Kredensial untuk login ke web interface mongo-express
+      ME_CONFIG_BASICAUTH_USERNAME: ${ME_USER}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${ME_PASSWORD}
+      # Memberitahu mongo-express alamat server MongoDB
+      ME_CONFIG_MONGODB_SERVER: mongodb # 'mongodb' adalah nama servis database di atas
+      # Kredensial yang digunakan mongo-express untuk terhubung ke MongoDB
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_ROOT_USER}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_ROOT_PASSWORD}
+    depends_on:
+      # Memastikan mongodb jalan terlebih dahulu sebelum mongo-express
+      - mongodb
 
-# Uncomment line below if you want to use Volume storage
-# volumes:
-#   mongodata:
-#     external: true
+# Mendeklarasikan named volume yang digunakan oleh servis mongodb
+volumes:
+  mongo_data:
