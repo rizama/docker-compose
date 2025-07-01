@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+    rabbitmq:
+        # Menggunakan image yang sudah termasuk Management Plugin dan berbasis Alpine (lebih kecil).
+        # Gunakan versi spesifik seperti 3.13 untuk konsistensi.
+        image: rabbitmq:3.13-management-alpine
+        container_name: rabbitmq
+        restart: unless-stopped
+
+        # Membaca variabel dari file .env untuk keamanan
+        env_file:
+            - .env
+
+        ports:
+            # Port 5672 untuk koneksi dari aplikasi Anda (AMQP)
+            - '5672:5672'
+            # Port 15672 untuk mengakses Management Dashboard via browser
+            - '15672:15672'
+
+        volumes:
+            # Menggunakan named volume untuk menyimpan data RabbitMQ (queues, messages, users, etc)
+            - rabbitmq_data:/var/lib/rabbitmq
+
+        healthcheck:
+            # Memeriksa apakah broker RabbitMQ sehat dan siap menerima koneksi
+            test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
+            interval: 30s
+            timeout: 30s
+            retries: 3
+
+# Mendeklarasikan named volume yang digunakan
+volumes:
+    rabbitmq_data:
