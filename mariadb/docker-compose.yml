@@ -23,7 +23,7 @@ services:
                     'localhost',
                     '-u',
                     'root',
-                    '-p${MARIADB_ROOT_PASSWORD}',
+                    '-proot',
                 ]
             interval: 10s
             timeout: 5s
